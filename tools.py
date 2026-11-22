@@ -33,33 +33,45 @@ RUNBOOKS = [
 ]
 
 @tool
-def query_logs(Service: str) -> list[dict]:
+def query_logs(Service: str, start_time: str | None = None, end_time: str | None = None) -> list[dict]:
     """Search application logs for a given service name."""
     results = []
     for logs in LOGS:
         if logs["Service"].lower() == Service.lower():
+            if start_time and logs["Timestamp"] < start_time:
+                continue
+            if end_time and logs["Timestamp"] > end_time:
+                continue
             results.append(logs)
     if not results:
         return [{"message": f"No logs found for service '{Service}'."}]
     return results
 
 @tool
-def read_metrics(Service: str) -> list[dict]:
+def read_metrics(Service: str, start_time: str | None = None, end_time: str | None = None) -> list[dict]:
     """Read server health metrics such as CPU, memory, latency, and error rate for a service."""
     results = []
     for metrics in METRICS:
         if metrics["Service"].lower() == Service.lower():
+            if start_time and metrics["Timestamp"] < start_time:
+                continue
+            if end_time and metrics["Timestamp"] > end_time:
+                continue
             results.append(metrics)
     if not results:
         return [{"message": f"No metrics found for service '{Service}'."}]
     return results
 
 @tool
-def list_deployments(Service: str) -> list[dict]:
+def list_deployments(Service: str, start_time: str | None = None, end_time: str | None = None) -> list[dict]:
     """List recent code or configuration deployments for a service."""
     results = []
     for deployment in DEPLOYMENT:
         if deployment["Service"].lower() == Service.lower():
+            if start_time and deployment["Timestamp"] < start_time:
+                continue
+            if end_time and deployment["Timestamp"] > end_time:
+                continue
             results.append(deployment)
     if not results:
         return [{"message": f"No deployments found for service '{Service}'."}]
@@ -68,12 +80,15 @@ def list_deployments(Service: str) -> list[dict]:
 @tool
 def search_runbooks(Title: str) -> list[dict]:
     """Search troubleshooting runbooks by keyword or issue title."""
+    keywords = Title.lower().split()
     results = []
-    for runbooks in RUNBOOKS:
-        if Title.lower() in runbooks["Title"].lower():
-            results.append(runbooks)
+    for runbook in RUNBOOKS:
+        text = (runbook["Title"] + " " + " ".join(runbook["Steps"])).lower()
+        if any(word in text for word in keywords):
+            results.append(runbook)
     if not results:
         return [{"message": f"No runbooks found matching '{Title}'."}]
     return results
+
 
 
