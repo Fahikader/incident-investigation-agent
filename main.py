@@ -26,9 +26,10 @@ You are an Incident Investigation Agent.
 
 
 model = BedrockModel(
-    model_id="eu.anthropic.claude-opus-4-6-v1",
+    model_id="eu.amazon.nova-pro-v1:0",
     region_name="eu-north-1",
 )
+
 
 
 
